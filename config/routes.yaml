@@ -1,3 +1,14 @@
 #index:
 #    path: /
 #    controller: App\Controller\DefaultController::index
+    
+# Test API controller routes
+app_test_contacts:
+    path: /test/contacts
+    controller: App\Controller\TestController::contacts
+    
+app_test_contacts_filtered:
+    # Matches /blog/*
+    # but not /blog/slug/extra-part
+    path:     /test/contacts/{type}
+    controller: App\Controller\TestController::filtered
