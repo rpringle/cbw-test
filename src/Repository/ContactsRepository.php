@@ -14,26 +14,40 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class ContactsRepository extends ServiceEntityRepository
 {
+        
     public function __construct(RegistryInterface $registry)
-    {
+    {        
         parent::__construct($registry, Contacts::class);
     }
     
     /**
+     * Find contacts
+     * 
      * @param $active
+     * @param $state
      * @param $sort
      * @param $direction
      * @return Contacts[]
      */
-    public function findContacts($active, $sort, $direction): array
+    public function findContacts($active, $state, $sort, $direction): array
     {
-        // Select by active status, sort by passed field
-        $qb = $this->createQueryBuilder('c')
-            ->andWhere('c.active = :active')
-            ->setParameter('active', $active)
-            ->orderBy($sort, $direction)
-            ->getQuery();
+        $qb = $this->createQueryBuilder('c');
+        
+        if ($active != 'all') {
+            $qb->andWhere('c.active = :active');
+            $qb->setParameter('type', $active);
+        }
+        if ($state != 'all') {
+            $qb->andWhere('c.state = :state');
+            $qb->setParameter('state', $state);
+        }
+        
+        $qb->orderBy($sort, $direction);
+        $qb->getQuery();
 
+        // TODO: Figure out the proper method for dynamically building a query
+        // using QueryBuilder. Currently returns the following error:
+        // Attempted to call an undefined method named "execute" of class "Doctrine\ORM\QueryBuilder"
         return $qb->execute();
     }
     

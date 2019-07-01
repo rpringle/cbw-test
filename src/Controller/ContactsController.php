@@ -47,9 +47,11 @@ class ContactsController extends AbstractController
     }
     
     /**
-     * @Route("/contacts/{type}/{sort}/{dir}", name="contacts_type")
+     * Show contacts
+     * 
+     * @Route("/contacts/{type}/{state}/{sort}/{dir}", name="contacts_type")
      */
-    public function show($type, $sort = 'id', $dir = 'ASC')
+    public function show($type = 'all', $state = 'all', $sort = 'id', $dir = 'ASC')
     {
         $encoders = [new JsonEncoder()];
         $normalizers = [new ObjectNormalizer()];
@@ -61,23 +63,18 @@ class ContactsController extends AbstractController
                  
         $dir = $this->cleanSortDir($dir);
     
-        switch ($type) {
-            case 'active':
-                $active = 1;
-                /*$contacts = $repository->findBy(
-                   ['active' => $active]
-                );*/
-                $contacts = $repository->findContacts($active, $sort, $dir);
-                break;
-            case 'inactive':
-                $active = 0;
-                $contacts = $repository->findContacts($active, $sort, $dir);
-                break;
-            case 'all':
-            default:
-                $contacts = $repository->findAllContacts($sort, $dir);
-                break;
+        // Check for type, default to all
+        if ($type != 'active' && $type != 'inactive') {
+            $type = 'all';
         }
+        // Check for state, default to all
+        if (strlen($state) != 2 && !ctype_alpha($state)) {
+            $state = 'all';
+        } else {
+            $state = strtoupper($state);
+        }
+            
+        $contacts = $repository->findContacts($type, $state, $sort, $dir);
         
         if (!isset($contacts) || !$contacts) {
             $contacts = array('error' => 'No contacts found');
